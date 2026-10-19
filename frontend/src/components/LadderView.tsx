@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, SlidersHorizontal, Info, Edit3 } from 'lucide-react';
+import { Search, SlidersHorizontal, Info, Edit3, Trash2 } from 'lucide-react';
 import { Clan, User } from '../types';
 import { ClanLogo } from './ClanLogo';
 
@@ -12,6 +12,7 @@ interface LadderViewProps {
   user: User | null;
   onSelectClan: (clan: Clan) => void;
   onOpenAdjust: (clan: Clan) => void;
+  onDeleteClan?: (clan: Clan) => void;
 }
 
 export const LadderView: React.FC<LadderViewProps> = ({
@@ -23,6 +24,7 @@ export const LadderView: React.FC<LadderViewProps> = ({
   user,
   onSelectClan,
   onOpenAdjust,
+  onDeleteClan,
 }) => {
   const tiers = [
     { id: '', label: 'Все ранги' },
@@ -173,13 +175,26 @@ export const LadderView: React.FC<LadderViewProps> = ({
                   </button>
 
                   {user && (
-                    <button
-                      onClick={() => onOpenAdjust(c)}
-                      className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                      <span>Очки</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={() => onOpenAdjust(c)}
+                        className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans"
+                        title="Скорректировать очки"
+                      >
+                        <Edit3 className="w-3 h-3" />
+                        <span>Очки</span>
+                      </button>
+
+                      {onDeleteClan && (
+                        <button
+                          onClick={() => onDeleteClan(c)}
+                          className="flex items-center justify-center w-7 h-7 rounded-full border border-rose-500/25 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition text-xs cursor-pointer font-sans"
+                          title="Удалить клан"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

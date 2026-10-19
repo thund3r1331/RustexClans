@@ -9,6 +9,7 @@ import { RulesView } from './components/RulesView';
 import { ClanDetailModal } from './components/ClanDetailModal';
 import { AdjustModal } from './components/AdjustModal';
 import { CreateClanModal } from './components/CreateClanModal';
+import { DeleteClanModal } from './components/DeleteClanModal';
 import { LoginModal } from './components/LoginModal';
 import { ApplyModal } from './components/ApplyModal';
 import { Clan, RatingLog, User, TabId } from './types';
@@ -25,6 +26,7 @@ export const App: React.FC = () => {
   // Modals state
   const [selectedClan, setSelectedClan] = useState<Clan | null>(null);
   const [clanForAdjust, setClanForAdjust] = useState<Clan | null>(null);
+  const [clanForDelete, setClanForDelete] = useState<Clan | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [isLoginOpen, setIsLoginOpen] = useState<boolean>(false);
   const [isApplyOpen, setIsApplyOpen] = useState<boolean>(false);
@@ -277,6 +279,7 @@ export const App: React.FC = () => {
               user={user}
               onSelectClan={(c) => setSelectedClan(c)}
               onOpenAdjust={(c) => setClanForAdjust(c)}
+              onDeleteClan={(c) => setClanForDelete(c)}
             />
           )}
 
@@ -308,6 +311,7 @@ export const App: React.FC = () => {
           clan={selectedClan}
           onClose={() => setSelectedClan(null)}
           onOpenAdjust={(c) => setClanForAdjust(c)}
+          onDeleteClan={(c) => setClanForDelete(c)}
           isModerator={!!user}
         />
       )}
@@ -320,6 +324,21 @@ export const App: React.FC = () => {
           onSuccess={() => {
             fetchClans();
             fetchRaids();
+          }}
+        />
+      )}
+
+      {clanForDelete && (
+        <DeleteClanModal
+          clan={clanForDelete}
+          token={token}
+          onClose={() => setClanForDelete(null)}
+          onSuccess={() => {
+            fetchClans();
+            fetchRaids();
+            if (selectedClan?.id === clanForDelete.id) {
+              setSelectedClan(null);
+            }
           }}
         />
       )}

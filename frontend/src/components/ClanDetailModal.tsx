@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Users, TrendingUp, Trophy, Edit3 } from 'lucide-react';
+import { X, Users, TrendingUp, Trophy, Edit3, Trash2 } from 'lucide-react';
 import { Clan, RatingLog } from '../types';
 import { ClanLogo } from './ClanLogo';
 import {
@@ -28,6 +28,7 @@ interface ClanDetailModalProps {
   clan: Clan | null;
   onClose: () => void;
   onOpenAdjust?: (clan: Clan) => void;
+  onDeleteClan?: (clan: Clan) => void;
   isModerator?: boolean;
 }
 
@@ -35,6 +36,7 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
   clan,
   onClose,
   onOpenAdjust,
+  onDeleteClan,
   isModerator,
 }) => {
   const [history, setHistory] = useState<RatingLog[]>([]);
@@ -236,18 +238,33 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
         </div>
 
         {/* Footer Actions */}
-        {isModerator && onOpenAdjust && (
-          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-end">
-            <button
-              onClick={() => {
-                onClose();
-                onOpenAdjust(clan);
-              }}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>Скорректировать очки</span>
-            </button>
+        {isModerator && (
+          <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-3">
+            {onDeleteClan && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onDeleteClan(clan);
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-rose-500/25 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 font-semibold text-xs transition cursor-pointer font-sans"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Удалить клан</span>
+              </button>
+            )}
+
+            {onOpenAdjust && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onOpenAdjust(clan);
+                }}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans ml-auto"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Скорректировать очки</span>
+              </button>
+            )}
           </div>
         )}
       </div>
