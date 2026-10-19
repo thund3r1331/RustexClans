@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full antialiased dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RUSTEX // HLTV Clan Rankings</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace'],
+          },
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #000000;
+      color: #f4f4f5;
+      font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+      overflow-x: hidden;
+    }
+    .bento-card {
+      position: relative;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-radius: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bento-card:hover {
+      background: rgba(255, 255, 255, 0.045);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.2);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col font-sans bg-[#000000] text-zinc-100 selection:bg-white/20 selection:text-white relative">
+
+  <!-- Ambient background glow (zelenskiy.xyz style) -->
+  <div class="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_50%_at_50%_0%,rgba(255,255,255,0.05),rgba(0,0,0,0))] z-0"></div>
+
+  <!-- Subtle interactive particle canvas -->
+  <canvas id="bg-canvas" class="fixed inset-0 pointer-events-none z-0 select-none opacity-40"></canvas>
+
+  <!-- APP CONTENT -->
+  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 w-full flex-grow">
+
+    <!-- 00 // TOP HEADER BAR (Glass Bento Header) -->
+    <header class="rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-2xl px-4 sm:px-5 py-3 flex flex-wrap items-center justify-between text-xs text-zinc-400 gap-3 select-none transition-all duration-300 hover:border-white/[0.15]">
+      
+      <!-- Brand & Online status -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-2">
+          <span class="relative flex h-2.5 w-2.5">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-emerald-400/40"></span>
+            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+          </span>
+          <span class="font-bold text-white tracking-tight text-sm">RUSTEX // Remake</span>
+        </div>
+        <span class="text-white/10 hidden sm:inline">•</span>
+        <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono border border-white/[0.06] bg-white/[0.02] text-zinc-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>MINECRAFT SERVER</span>
+        </span>
+      </div>
+
+      <!-- Live Clock & Moderator Auth -->
+      <div class="flex items-center gap-3 font-mono text-[11px]">
+        <div class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/[0.08] bg-white/[0.03] text-zinc-300">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-zinc-400"></i>
+          <span class="text-zinc-500 text-[10px] uppercase font-semibold">LOCAL:</span>
+          <span id="live-clock" class="text-white font-medium tabular-nums">--:--:--</span>
+        </div>
+
+        <div id="auth-actions">
+          <button onclick="openModal('login-modal')" class="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition cursor-pointer">
+            <i data-lucide="shield" class="w-3 h-3 text-zinc-400"></i>
+            <span>Модерация</span>
+          </button>
+        </div>
+      </div>
+
+    </header>
+
+    <!-- ADMIN TOOLBAR (Shows if moderator is logged in) -->
+    <div id="admin-toolbar" class="hidden rounded-2xl border border-white/20 bg-white/[0.06] backdrop-blur-2xl px-5 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2">
+        <span class="relative flex h-2 w-2">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-amber-400/40"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-400"></span>
+        </span>
+        <span class="text-zinc-300">Сессия модератора:</span>
+        <span id="admin-user-display" class="font-mono text-white font-bold bg-white/10 px-2 py-0.5 rounded-full">admin</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openModal('create-clan-modal')" class="px-3.5 py-1.5 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow-lg flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i> Добавить клан
+        </button>
+        <button onclick="logout()" class="px-2.5 py-1 text-zinc-500 hover:text-rose-400 text-xs font-mono transition">
+          Выйти
+        </button>
+      </div>
+    </div>
+
+    <!-- 01 // HERO BENTO: CORE RANKING OVERVIEW -->
+    <section class="bento-card p-6 sm:p-8 lg:p-10 overflow-hidden relative group">
+      <div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-white/[0.03] blur-3xl pointer-events-none group-hover:bg-white/[0.06] transition-all duration-500"></div>
+
+      <!-- Eyebrow -->
+      <div class="flex flex-wrap items-center justify-between text-xs font-mono text-zinc-500 gap-2 mb-6 sm:mb-8 pb-4 border-b border-white/[0.06]">
+        <div class="flex items-center gap-2">
+          <span class="text-[10px] text-zinc-400 uppercase tracking-widest font-semibold">01 // RUSTEX REMAKE LADDER</span>
+          <span class="text-zinc-700">|</span>
+          <span class="inline-flex items-center gap-1.5 text-zinc-400 text-[11px]">
+            <i data-lucide="trophy" class="w-3.5 h-3.5 text-zinc-400"></i>
+            <span>HLTV CLAN RANKING</span>
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.02] text-[10px] font-mono text-zinc-400 uppercase">
+            НЕПРЕРЫВНЫЙ СЕЗОН
+          </span>
+        </div>
+      </div>
+
+      <!-- Hero Main Content -->
+      <div class="flex flex-col sm:flex-row items-start justify-between gap-6">
+        <div class="space-y-3 max-w-xl">
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white font-sans">
+            Рейтинг кланов Rustex
+          </h1>
+          <p class="text-sm text-zinc-400 leading-relaxed font-sans">
+            Официальный соревновательный ладдер для сервера Rustex Remake в Minecraft. Корректировка очков производится коллегией модераторов на основе рейдов и активности.
+          </p>
+        </div>
+
+        <!-- Quick Summary Stats -->
+        <div class="grid grid-cols-2 gap-3 w-full sm:w-auto shrink-0 font-mono text-xs">
+          <div class="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[120px]">
+            <span class="text-[10px] text-zinc-500 uppercase block mb-1">КЛАНОВ В ТОПЕ</span>
+            <span id="stat-clans-count" class="text-2xl font-bold text-white tabular-nums">-</span>
+          </div>
+          <div class="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[120px]">
+            <span class="text-[10px] text-zinc-500 uppercase block mb-1">ТОП-1 ОЧКИ</span>
+            <span id="stat-top-points" class="text-2xl font-bold text-white tabular-nums">-</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 // TOP 3 FEATURED TEAMS (Bento Podium) -->
+    <section>
+      <div class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest mb-3 px-1">
+        02 // FEATURED TOP TEAMS
+      </div>
+      <div id="podium-grid" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Заполняется JS -->
+        <div class="h-44 bento-card animate-pulse"></div>
+        <div class="h-44 bento-card animate-pulse"></div>
+        <div class="h-44 bento-card animate-pulse"></div>
+      </div>
+    </section>
+
+    <!-- 03 // FULL CLAN RANKING LADDER -->
+    <section class="bento-card p-6 sm:p-8 overflow-hidden relative">
+      
+      <!-- Section Header & Controls -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-white/[0.06]">
+        <div>
+          <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest block mb-0.5">03 // FULL LADDER</span>
+          <h2 class="text-xl font-bold text-white tracking-tight">Таблица позиций</h2>
+        </div>
+
+        <!-- Filters & Search -->
+        <div class="flex flex-wrap items-center gap-2">
+          <!-- Tier filters -->
+          <div class="flex items-center gap-1 bg-white/[0.02] border border-white/[0.06] p-1 rounded-full text-xs font-mono">
+            <button onclick="setTierFilter('')" id="tier-all" class="px-3 py-1 rounded-full bg-white text-black font-semibold transition">Все</button>
+            <button onclick="setTierFilter('Tier 1')" id="tier-t1" class="px-3 py-1 rounded-full text-zinc-400 hover:text-white transition">Tier 1</button>
+            <button onclick="setTierFilter('Tier 2')" id="tier-t2" class="px-3 py-1 rounded-full text-zinc-400 hover:text-white transition">Tier 2</button>
+            <button onclick="setTierFilter('Tier 3')" id="tier-t3" class="px-3 py-1 rounded-full text-zinc-400 hover:text-white transition">Tier 3</button>
+          </div>
+
+          <!-- Search Input -->
+          <div class="relative w-full sm:w-56">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-2.5"></i>
+            <input 
+              type="text" 
+              id="search-input" 
+              oninput="handleSearch(this.value)" 
+              placeholder="Поиск по тегу / названию..." 
+              class="w-full bg-white/[0.02] border border-white/[0.08] rounded-full pl-8 pr-3 py-1.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-white/30 transition font-mono"
+            >
+          </div>
+        </div>
+      </div>
+
+      <!-- LADDER ROWS -->
+      <div id="ladder-container" class="space-y-2.5">
+        <div class="py-12 text-center text-zinc-500 font-mono text-xs">Загрузка рейтинга...</div>
+      </div>
+
+    </section>
+
+    <!-- 04 // RECENT RAIDS & AUDIT LOG (Bento) -->
+    <section class="bento-card p-6 sm:p-8 overflow-hidden relative">
+      <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
+        <div>
+          <span class="text-[10px] text-zinc-500 font-mono uppercase tracking-widest block mb-0.5">04 // AUDIT & RECENT RAIDS</span>
+          <h2 class="text-xl font-bold text-white tracking-tight">Журнал изменений очков</h2>
+        </div>
+        <span class="text-xs font-mono text-zinc-500">PUBLIC LOG</span>
+      </div>
+
+      <div id="raids-container" class="space-y-2 font-mono text-xs">
+        <div class="text-center py-6 text-zinc-600">Загрузка последних рейдов...</div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="relative z-10 max-w-5xl mx-auto px-4 py-8 border-t border-white/[0.06] text-center text-xs font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+    <div>
+      <span class="text-zinc-400 font-semibold">RUSTEX // Remake</span> • HLTV Clan Rankings
+    </div>
+    <div class="flex items-center gap-4 text-zinc-500">
+      <a href="/docs" target="_blank" class="hover:text-white transition">FastAPI Swagger</a>
+      <span>//</span>
+      <span>SQLite WAL</span>
+    </div>
+  </footer>
+
+  <!-- MODAL: TEAM PROFILE & FORM CHART (Bento Glass Modal) -->
+  <div id="team-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-3xl hidden flex items-center justify-center p-4">
+    <div class="relative max-w-2xl w-full p-6 sm:p-8 rounded-3xl border border-white/[0.1] bg-[#0c0d10] backdrop-blur-2xl shadow-[0_0_80px_rgba(0,0,0,0.8)] overflow-hidden space-y-6 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <button onclick="closeModal('team-modal')" class="absolute top-5 right-5 p-2 rounded-full border border-white/10 bg-white/[0.04] text-zinc-400 hover:text-white transition">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div id="team-modal-content">
+        <!-- Заполняется JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADJUST RATING (Для модераторов) -->
+  <div id="adjust-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-3xl hidden flex items-center justify-center p-4">
+    <div class="relative max-w-md w-full p-6 sm:p-8 rounded-3xl border border-white/[0.15] bg-[#0c0d10] backdrop-blur-2xl shadow-2xl space-y-5">
+      <button onclick="closeModal('adjust-modal')" class="absolute top-5 right-5 text-zinc-400 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">MODERATOR ACTION</span>
+        <h3 class="text-xl font-bold text-white tracking-tight">Корректировка рейтинга</h3>
+        <p id="adjust-clan-label" class="text-xs font-mono text-zinc-400">[TITAN] Titan Esports</p>
+      </div>
+
+      <form onsubmit="submitAdjustment(event)" class="space-y-4 text-xs font-mono">
+        <input type="hidden" id="adjust-clan-id">
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Дельта очков:</label>
+          <div class="grid grid-cols-4 gap-1.5 mb-2">
+            <button type="button" onclick="setDelta(150)" class="py-1 rounded-lg border border-white/10 bg-white/[0.03] text-emerald-400 font-bold hover:bg-white/[0.08] transition">+150</button>
+            <button type="button" onclick="setDelta(75)" class="py-1 rounded-lg border border-white/10 bg-white/[0.03] text-emerald-400 font-bold hover:bg-white/[0.08] transition">+75</button>
+            <button type="button" onclick="setDelta(-75)" class="py-1 rounded-lg border border-white/10 bg-white/[0.03] text-rose-400 font-bold hover:bg-white/[0.08] transition">-75</button>
+            <button type="button" onclick="setDelta(-150)" class="py-1 rounded-lg border border-white/10 bg-white/[0.03] text-rose-400 font-bold hover:bg-white/[0.08] transition">-150</button>
+          </div>
+          <input 
+            type="number" 
+            id="adjust-delta" 
+            required 
+            placeholder="например: 100 или -50" 
+            class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-white/40"
+          >
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Причина / номер заявки:</label>
+          <textarea 
+            id="adjust-reason" 
+            required 
+            rows="2" 
+            placeholder="Заявка #108: рейд на мейн базу BLOOD..." 
+            class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white font-sans focus:outline-none focus:border-white/40 text-xs"
+          ></textarea>
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Ссылка на видео/скриншот:</label>
+          <input 
+            type="url" 
+            id="adjust-proof" 
+            placeholder="https://youtube.com/watch?v=..." 
+            class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white font-mono focus:outline-none focus:border-white/40 text-xs"
+          >
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow-xl mt-2 cursor-pointer font-sans">
+          Применить изменение
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: LOGIN -->
+  <div id="login-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-3xl hidden flex items-center justify-center p-4">
+    <div class="relative max-w-sm w-full p-6 sm:p-8 rounded-3xl border border-white/[0.1] bg-[#0c0d10] backdrop-blur-2xl shadow-2xl space-y-4">
+      <button onclick="closeModal('login-modal')" class="absolute top-5 right-5 text-zinc-400 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+
+      <div class="space-y-1">
+        <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">AUTHENTICATION</span>
+        <h3 class="text-xl font-bold text-white tracking-tight">Панель модератора</h3>
+      </div>
+
+      <form onsubmit="handleLogin(event)" class="space-y-3 text-xs font-mono">
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Логин:</label>
+          <input type="text" id="login-user" required placeholder="admin" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40">
+        </div>
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Пароль:</label>
+          <input type="password" id="login-pass" required placeholder="••••••••" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40">
+        </div>
+        <div id="login-err" class="text-rose-400 text-[11px] hidden"></div>
+        <button type="submit" class="w-full py-3 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow-xl font-sans mt-2 cursor-pointer">
+          Войти в систему
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CREATE / EDIT CLAN -->
+  <div id="create-clan-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-3xl hidden flex items-center justify-center p-4">
+    <div class="relative max-w-md w-full p-6 sm:p-8 rounded-3xl border border-white/[0.1] bg-[#0c0d10] backdrop-blur-2xl shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+      <button onclick="closeModal('create-clan-modal')" class="absolute top-5 right-5 text-zinc-400 hover:text-white">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <h3 class="text-xl font-bold text-white tracking-tight">Регистрация клана</h3>
+      
+      <form onsubmit="handleCreateClan(event)" class="space-y-3.5 text-xs font-mono">
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Название клана:</label>
+          <input type="text" id="new-clan-name" required placeholder="Titan Esports" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40">
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Тег клана:</label>
+          <input type="text" id="new-clan-tag" required placeholder="TITAN" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white uppercase focus:outline-none focus:border-white/40">
+        </div>
+
+        <!-- Логотип клана: Прямая загрузка файла -->
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Логотип клана (Файл с ПК):</label>
+          <div class="flex items-center gap-3">
+            <div id="logo-preview-box" class="w-12 h-12 rounded-xl border border-white/10 bg-white/[0.02] flex items-center justify-center shrink-0 overflow-hidden">
+              <i data-lucide="image" class="w-5 h-5 text-zinc-600"></i>
+            </div>
+            <div class="flex-grow space-y-1">
+              <input type="file" id="new-clan-file" accept="image/*" onchange="previewAndUploadLogo(this)" class="hidden">
+              <button type="button" onclick="document.getElementById('new-clan-file').click()" class="px-3 py-1.5 rounded-full border border-white/15 bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition text-xs flex items-center gap-1.5 cursor-pointer font-sans">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Выбрать файл...
+              </button>
+              <input type="hidden" id="new-clan-logo-url">
+              <span id="logo-upload-status" class="text-[10px] text-zinc-500 block">PNG, JPG, WEBP до 5 MB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Список участников (ростер текстом) -->
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Состав клана (ники через запятую):</label>
+          <textarea id="new-clan-roster" rows="2" placeholder="BeastLeader, RustAimGod, RocketMan, NightFarmer" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40 text-xs font-mono"></textarea>
+          <span class="text-[10px] text-zinc-600">Игроки отображаются в профиле команды списком никнеймов</span>
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Стартовые очки:</label>
+          <input type="number" id="new-clan-points" value="1000" class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40">
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 uppercase mb-1">Описание / инфо:</label>
+          <textarea id="new-clan-desc" rows="2" placeholder="Краткое описание клана..." class="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40 text-xs font-sans"></textarea>
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition font-sans mt-2 cursor-pointer shadow-xl">
+          Зарегистрировать клан
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    const API_BASE = '/api/v1';
+    let allClans = [];
+    let currentTier = '';
+    let searchQuery = '';
+    let token = localStorage.getItem('rustex_token');
+    let user = null;
+    let chartInstance = null;
+
+    // Background Particle Canvas (zelenskiy.xyz style)
+    function initCanvas() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      });
+
+      const particles = Array.from({ length: 45 }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        radius: Math.random() * 1.2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.3,
+        speedY: (Math.random() - 0.5) * 0.3,
+        alpha: Math.random() * 0.5 + 0.2
+      }));
+
+      function render() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.x < 0) p.x = w;
+          if (p.x > w) p.x = 0;
+          if (p.y < 0) p.y = h;
+          if (p.y > h) p.y = 0;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
+          ctx.fill();
+        });
+        requestAnimationFrame(render);
+      }
+      render();
+    }
+
+    // Live Clock
+    function updateClock() {
+      const el = document.getElementById('live-clock');
+      if (el) {
+        const now = new Date();
+        el.textContent = now.toLocaleTimeString('ru-RU');
+      }
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      initCanvas();
+      lucide.createIcons();
+      await checkAuth();
+      await loadLeaderboard();
+      await loadRecentRaids();
+    });
+
+    // Авторизация
+    async function checkAuth() {
+      if (!token) {
+        renderAuthUI(null);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          user = await res.json();
+          renderAuthUI(user);
+        } else {
+          logout();
+        }
+      } catch (e) {
+        renderAuthUI(null);
+      }
+    }
+
+    function renderAuthUI(usr) {
+      const container = document.getElementById('auth-actions');
+      const bar = document.getElementById('admin-toolbar');
+      const badge = document.getElementById('admin-user-display');
+
+      if (usr) {
+        bar.classList.remove('hidden');
+        badge.textContent = `${usr.username} (${usr.role})`;
+        container.innerHTML = `
+          <button onclick="logout()" class="px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-400 hover:text-rose-400 text-xs transition cursor-pointer">
+            Выйти
+          </button>
+        `;
+      } else {
+        bar.classList.add('hidden');
+        container.innerHTML = `
+          <button onclick="openModal('login-modal')" class="flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition cursor-pointer">
+            <i data-lucide="shield" class="w-3 h-3 text-zinc-400"></i>
+            <span>Модерация</span>
+          </button>
+        `;
+      }
+      lucide.createIcons();
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('login-err');
+      errEl.classList.add('hidden');
+      const u = document.getElementById('login-user').value;
+      const p = document.getElementById('login-pass').value;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        });
+        if (!res.ok) {
+          const d = await res.json();
+          throw new Error(d.detail || 'Ошибка авторизации');
+        }
+        const data = await res.json();
+        token = data.access_token;
+        localStorage.setItem('rustex_token', token);
+        closeModal('login-modal');
+        await checkAuth();
+        await loadLeaderboard();
+      } catch (err) {
+        errEl.textContent = err.message;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    function logout() {
+      token = null;
+      user = null;
+      localStorage.removeItem('rustex_token');
+      renderAuthUI(null);
+      loadLeaderboard();
+    }
+
+    // Загрузка ладдера
+    async function loadLeaderboard() {
+      let url = `${API_BASE}/leaderboard?`;
+      if (currentTier) url += `tier=${encodeURIComponent(currentTier)}&`;
+      if (searchQuery) url += `search=${encodeURIComponent(searchQuery)}&`;
+
+      try {
+        const res = await fetch(url);
+        allClans = await res.json();
+
+        document.getElementById('stat-clans-count').textContent = allClans.length;
+        document.getElementById('stat-top-points').textContent = allClans[0]?.points || 0;
+
+        renderPodium(allClans);
+        renderLadderRows(allClans);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Единый компонент логотипа клана (или минималистичная заглушка-щит)
+    function getClanLogoHtml(logoUrl, sizeClass = 'w-9 h-9 rounded-xl', iconSizeClass = 'w-4 h-4') {
+      if (!logoUrl) {
+        return `
+          <div class="${sizeClass} shrink-0 bg-white/[0.03] border border-white/10 flex items-center justify-center text-zinc-500 shadow-inner">
+            <svg class="${iconSizeClass}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+          </div>
+        `;
+      }
+      return `
+        <div class="${sizeClass} shrink-0 relative overflow-hidden flex items-center justify-center bg-white/[0.03] border border-white/10 shadow-inner">
+          <svg class="${iconSizeClass} text-zinc-500 absolute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+          <img src="${logoUrl}" alt="" onerror="this.remove()" class="w-full h-full object-cover absolute inset-0 bg-black">
+        </div>
+      `;
+    }
+
+    // Рендер подиума топ-3
+    function renderPodium(clans) {
+      const container = document.getElementById('podium-grid');
+      if (!clans || clans.length === 0) {
+        container.innerHTML = '<div class="col-span-3 text-center py-6 text-zinc-600 font-mono text-xs">Нет команд</div>';
+        return;
+      }
+
+      const top3 = clans.slice(0, 3);
+      container.innerHTML = top3.map((c, i) => {
+        const medals = ['TOP 1 // GOLD', 'TOP 2 // SILVER', 'TOP 3 // BRONZE'];
+        return `
+          <div onclick="openTeamModal(${c.id})" class="bento-card p-5 cursor-pointer relative group flex flex-col justify-between">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-[10px] font-mono text-zinc-500 pb-2 border-b border-white/[0.06]">
+                <span>${medals[i]}</span>
+                <span class="px-2 py-0.5 rounded-full border border-white/[0.08] bg-white/[0.02] text-zinc-300 font-bold">#${c.rank}</span>
+              </div>
+
+              <div class="flex items-center gap-3">
+                ${getClanLogoHtml(c.logo_url, 'w-12 h-12 rounded-2xl', 'w-5 h-5')}
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-xs font-bold text-zinc-400">[${c.tag}]</span>
+                    <h3 class="font-bold text-white text-base leading-tight group-hover:text-zinc-200 transition">${c.name}</h3>
+                  </div>
+                  <span class="text-[10px] font-mono text-zinc-500 uppercase mt-0.5 block">${c.tier}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between font-mono">
+              <div>
+                <span class="text-[10px] text-zinc-500 uppercase block">ОЧКИ</span>
+                <span class="text-lg font-bold text-white tabular-nums">${c.points} <span class="text-[10px] text-zinc-500 font-normal">pts</span></span>
+              </div>
+              <div class="flex items-center gap-1">
+                ${renderDeltaPill(c.rank_change)}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function renderDeltaPill(delta) {
+      if (delta > 0) {
+        return `<span class="px-2 py-0.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-mono text-[10px] font-bold">+${delta}</span>`;
+      } else if (delta < 0) {
+        return `<span class="px-2 py-0.5 rounded-full border border-rose-500/20 bg-rose-500/10 text-rose-400 font-mono text-[10px] font-bold">${delta}</span>`;
+      } else {
+        return `<span class="px-2 py-0.5 rounded-full border border-white/[0.06] bg-white/[0.02] text-zinc-500 font-mono text-[10px]">-</span>`;
+      }
+    }
+
+    // Рендер строк ладдера (с простыми текстовыми никами)
+    function renderLadderRows(clans) {
+      const container = document.getElementById('ladder-container');
+      if (!clans || clans.length === 0) {
+        container.innerHTML = '<div class="py-12 text-center text-zinc-500 font-mono text-xs">Команд не найдено</div>';
+        return;
+      }
+
+      container.innerHTML = clans.map(c => `
+        <div class="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.015] hover:bg-white/[0.035] hover:border-white/[0.12] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          
+          <!-- Rank, Tag, Logo, Clan Name -->
+          <div class="flex items-center gap-3.5">
+            <div class="w-8 text-center shrink-0">
+              <span class="font-mono font-bold text-sm text-white">#${c.rank}</span>
+            </div>
+
+            <div class="shrink-0">
+              ${renderDeltaPill(c.rank_change)}
+            </div>
+
+            <div class="flex items-center gap-3 cursor-pointer" onclick="openTeamModal(${c.id})">
+              ${getClanLogoHtml(c.logo_url, 'w-9 h-9 rounded-xl', 'w-4 h-4')}
+              <div>
+                <div class="flex items-center gap-1.5">
+                  <span class="font-bold text-sm text-white hover:underline">${c.name}</span>
+                  <span class="font-mono text-xs text-zinc-400">[${c.tag}]</span>
+                </div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[10px] font-mono text-zinc-500 uppercase">${c.tier}</span>
+                  <span class="text-zinc-700 text-[10px]">•</span>
+                  <span class="text-[10px] font-mono text-zinc-500">${(c.members || []).length} участников</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Roster Tags & Points & Actions -->
+          <div class="flex items-center justify-between sm:justify-end gap-3 font-mono">
+            <!-- Lineup Nicknames (Text Pills) -->
+            <div class="hidden lg:flex items-center gap-1 max-w-xs overflow-hidden">
+              ${(c.members || []).slice(0, 3).map(m => `
+                <span class="px-2 py-0.5 rounded-full border border-white/[0.06] bg-white/[0.02] text-[10px] text-zinc-300 font-mono truncate">${m}</span>
+              `).join('')}
+              ${(c.members || []).length > 3 ? `<span class="text-[10px] text-zinc-500 font-mono">+${c.members.length - 3}</span>` : ''}
+            </div>
+
+            <!-- Points Display -->
+            <div class="text-right sm:w-28 shrink-0">
+              <span class="font-bold text-white text-sm tabular-nums">${c.points.toLocaleString('ru-RU')}</span>
+              <span class="text-[10px] text-zinc-500 ml-0.5">pts</span>
+            </div>
+
+            <!-- Action buttons -->
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button onclick="openTeamModal(${c.id})" class="px-3 py-1 rounded-full border border-white/10 bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition text-xs cursor-pointer font-sans">
+                Инфо
+              </button>
+              ${user ? `
+                <button onclick="openAdjustModal(${c.id}, '${c.tag}', '${c.name}', ${c.points})" class="px-3 py-1 rounded-full bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans">
+                  Очки
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+        </div>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    // Модалка деталей команды
+    async function openTeamModal(clanId) {
+      const modal = document.getElementById('team-modal');
+      const content = document.getElementById('team-modal-content');
+      content.innerHTML = '<div class="py-12 text-center text-zinc-500 font-mono text-xs">Загрузка данных...</div>';
+      openModal('team-modal');
+
+      try {
+        const [cRes, hRes] = await Promise.all([
+          fetch(`${API_BASE}/clans/${clanId}`),
+          fetch(`${API_BASE}/clans/${clanId}/history`)
+        ]);
+        const clan = await cRes.json();
+        const history = await hRes.json();
+
+        content.innerHTML = `
+          <!-- Header -->
+          <div class="flex items-start gap-4 pb-5 border-b border-white/[0.06]">
+            ${getClanLogoHtml(clan.logo_url, 'w-16 h-16 rounded-2xl', 'w-7 h-7')}
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-zinc-400">[${clan.tag}]</span>
+                <h2 class="text-2xl font-bold text-white tracking-tight">${clan.name}</h2>
+              </div>
+              <p class="text-xs text-zinc-400 font-sans leading-relaxed">${clan.description || 'Описание отсутствует'}</p>
+              <div class="flex items-center gap-3 pt-1 text-[11px] font-mono text-zinc-500">
+                <span>РАНГ: <b class="text-white">#${clan.rank}</b></span>
+                <span>ОЧКИ: <b class="text-white">${clan.points} pts</b></span>
+                <span>УРОВЕНЬ: <b class="text-zinc-300">${clan.tier}</b></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Chart.js History -->
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">RATING FORM // DYNAMICS</span>
+            <div class="p-3 rounded-2xl border border-white/[0.06] bg-white/[0.015] h-44">
+              <canvas id="clanChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Lineup (Simple Text Roster) -->
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">ACTIVE ROSTER (${(clan.members || []).length})</span>
+            <div class="flex flex-wrap gap-1.5 font-mono text-xs">
+              ${(clan.members || []).map(m => `
+                <span class="px-3 py-1 rounded-full border border-white/[0.08] bg-white/[0.02] text-zinc-200">${m}</span>
+              `).join('')}
+              ${(!clan.members || clan.members.length === 0) ? '<span class="text-zinc-600 text-xs italic">Состав не указан</span>' : ''}
+            </div>
+          </div>
+
+          <!-- History Logs -->
+          <div class="space-y-2">
+            <span class="text-[10px] font-mono uppercase tracking-widest text-zinc-500">REPORTS & RAIDS HISTORY</span>
+            <div class="space-y-1.5 max-h-36 overflow-y-auto custom-scrollbar font-mono text-xs">
+              ${history.map(h => `
+                <div class="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02] flex items-start justify-between gap-2 text-[11px]">
+                  <div>
+                    <div class="text-zinc-200 font-sans">${h.reason}</div>
+                    <div class="text-[9px] text-zinc-500 mt-0.5">Модератор: ${h.moderator_username} • ${new Date(h.created_at).toLocaleDateString('ru-RU')}</div>
+                    ${h.proof_url ? `<a href="${h.proof_url}" target="_blank" class="text-zinc-400 hover:text-white underline text-[9px] inline-block mt-0.5">Смотреть пруф ↗</a>` : ''}
+                  </div>
+                  <span class="font-bold ${h.delta > 0 ? 'text-emerald-400' : 'text-rose-400'} shrink-0">${h.delta > 0 ? '+' : ''}${h.delta}</span>
+                </div>
+              `).join('')}
+              ${history.length === 0 ? '<div class="text-zinc-600 text-center py-2 text-xs">История пуста</div>' : ''}
+            </div>
+          </div>
+        `;
+
+        lucide.createIcons();
+        renderChart(clan, history);
+      } catch (e) {
+        content.innerHTML = '<div class="text-center text-rose-400 py-6">Ошибка загрузки профиля</div>';
+      }
+    }
+
+    function renderChart(clan, history) {
+      const ctx = document.getElementById('clanChart');
+      if (!ctx) return;
+      if (chartInstance) chartInstance.destroy();
+
+      const labels = ['Старт', ...history.map((_, i) => `#${i + 1}`), 'Сейчас'];
+      let pt = clan.points - history.reduce((acc, h) => acc + h.delta, 0);
+      const data = [pt];
+      history.forEach(h => {
+        pt += h.delta;
+        data.push(pt);
+      });
+      data.push(clan.points);
+
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            borderColor: '#ffffff',
+            backgroundColor: 'rgba(255, 255, 255, 0.04)',
+            borderWidth: 1.5,
+            tension: 0.25,
+            fill: true,
+            pointBackgroundColor: '#ffffff',
+            pointRadius: 3,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 9, family: 'JetBrains Mono' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#52525b', font: { size: 9, family: 'JetBrains Mono' } } }
+          }
+        }
+      });
+    }
+
+    // Загрузка файла логотипа
+    async function previewAndUploadLogo(input) {
+      if (!input.files || !input.files[0]) return;
+      const file = input.files[0];
+
+      const status = document.getElementById('logo-upload-status');
+      const preview = document.getElementById('logo-preview-box');
+      const hiddenInput = document.getElementById('new-clan-logo-url');
+
+      status.textContent = 'Загрузка файла...';
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch(`${API_BASE}/uploads/logo`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || 'Ошибка загрузки файла');
+        }
+        const data = await res.json();
+        hiddenInput.value = data.url;
+        preview.innerHTML = `<img src="${data.url}" class="w-full h-full object-cover">`;
+        status.textContent = '✓ Логотип успешно загружен';
+        status.className = 'text-[10px] text-emerald-400 block';
+      } catch (err) {
+        status.textContent = `Ошибка: ${err.message}`;
+        status.className = 'text-[10px] text-rose-400 block';
+      }
+    }
+
+    // Аудит рейдов
+    async function loadRecentRaids() {
+      const container = document.getElementById('raids-container');
+      try {
+        const res = await fetch(`${API_BASE}/audit/rating-logs?limit=8`);
+        const logs = await res.json();
+        if (!logs || logs.length === 0) {
+          container.innerHTML = '<div class="text-zinc-600 text-center py-4">Рейдов пока не зафиксировано</div>';
+          return;
+        }
+
+        container.innerHTML = logs.map(l => `
+          <div class="p-3 rounded-xl border border-white/[0.06] bg-white/[0.015] flex items-center justify-between gap-3 text-xs">
+            <div class="flex items-center gap-3">
+              <span class="${l.delta > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold w-12 shrink-0">${l.delta > 0 ? '+' : ''}${l.delta}</span>
+              <div>
+                <span class="text-zinc-200 font-sans">${l.reason}</span>
+                <span class="text-[10px] text-zinc-500 block">${new Date(l.created_at).toLocaleString('ru-RU')} // mod: ${l.moderator_username}</span>
+              </div>
+            </div>
+            ${l.proof_url ? `<a href="${l.proof_url}" target="_blank" class="px-2.5 py-1 rounded-full border border-white/[0.08] bg-white/[0.03] text-zinc-400 hover:text-white transition text-[10px] shrink-0 font-sans">Пруф ↗</a>` : ''}
+          </div>
+        `).join('');
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // Корректировка очков
+    function openAdjustModal(id, tag, name, points) {
+      document.getElementById('adjust-clan-id').value = id;
+      document.getElementById('adjust-clan-label').textContent = `[${tag}] ${name} // Текущие очки: ${points}`;
+      document.getElementById('adjust-delta').value = '';
+      document.getElementById('adjust-reason').value = '';
+      document.getElementById('adjust-proof').value = '';
+      openModal('adjust-modal');
+    }
+
+    function setDelta(v) {
+      document.getElementById('adjust-delta').value = v;
+    }
+
+    async function submitAdjustment(e) {
+      e.preventDefault();
+      const id = document.getElementById('adjust-clan-id').value;
+      const delta = parseInt(document.getElementById('adjust-delta').value, 10);
+      const reason = document.getElementById('adjust-reason').value;
+      const proof_url = document.getElementById('adjust-proof').value || null;
+
+      try {
+        const res = await fetch(`${API_BASE}/clans/${id}/adjust-rating`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ delta, reason, proof_url })
+        });
+        if (!res.ok) throw new Error((await res.json()).detail);
+        closeModal('adjust-modal');
+        await loadLeaderboard();
+        await loadRecentRaids();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Создание клана
+    async function handleCreateClan(e) {
+      e.preventDefault();
+      const name = document.getElementById('new-clan-name').value;
+      const tag = document.getElementById('new-clan-tag').value;
+      const initial_points = parseInt(document.getElementById('new-clan-points').value, 10) || 1000;
+      const description = document.getElementById('new-clan-desc').value || null;
+      const roster = document.getElementById('new-clan-roster').value || null;
+      const logo_url = document.getElementById('new-clan-logo-url').value || null;
+
+      try {
+        const res = await fetch(`${API_BASE}/clans`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({ name, tag, initial_points, description, roster, logo_url })
+        });
+        if (!res.ok) throw new Error((await res.json()).detail);
+        closeModal('create-clan-modal');
+        await loadLeaderboard();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    // Фильтры
+    function setTierFilter(tier) {
+      currentTier = tier;
+      ['all', 't1', 't2', 't3'].forEach(id => {
+        const btn = document.getElementById(`tier-${id}`);
+        if (!btn) return;
+        const active = (id === 'all' && !tier) || (id === 't1' && tier === 'Tier 1') || (id === 't2' && tier === 'Tier 2') || (id === 't3' && tier === 'Tier 3');
+        if (active) {
+          btn.className = 'px-3 py-1 rounded-full bg-white text-black font-semibold transition';
+        } else {
+          btn.className = 'px-3 py-1 rounded-full text-zinc-400 hover:text-white transition';
+        }
+      });
+      loadLeaderboard();
+    }
+
+    let searchTimer = null;
+    function handleSearch(val) {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        searchQuery = val.trim();
+        loadLeaderboard();
+      }, 200);
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+  </script>
+</body>
+</html>
