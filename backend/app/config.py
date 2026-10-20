@@ -6,19 +6,16 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RustexClans API"
     VERSION: str = "1.0.0"
     API_V1_STR: str = "/api/v1"
+    ENV: str = "production"
 
-    # JWT Security
-    SECRET_KEY: str = "dev-secret-key-rustex-local-clans-2026"
+    # JWT Security (переопределяется через .env или переменные окружения)
+    SECRET_KEY: str = "-cHwLOqq91HHjvZBSWqCY8CPouN3rN6pEXV7YehNlmeDGqQNKCuCnNVNR3tXq-c2"
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 дней сессия
 
     # База данных
     DATABASE_URL: str = "sqlite+aiosqlite:///./rustex.db"
     # DATABASE_URL: str = "sqlite+aiosqlite:///:memory:"  # для тестов в памяти
-
-    # Дефолтный админ
-    SUPERUSER_USERNAME: str = "admin"
-    SUPERUSER_PASSWORD: str = "admin123!"
 
     # CORS
     CORS_ORIGINS: list[str] = [

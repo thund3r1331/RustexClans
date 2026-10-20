@@ -85,7 +85,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="admin"
+              placeholder="Логин"
               className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40"
             />
           </div>

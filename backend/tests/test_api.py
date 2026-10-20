@@ -7,6 +7,7 @@ import uuid
 backend_dir = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(backend_dir))
 
+from app.config import settings
 from app.main import app
 
 
@@ -39,7 +40,7 @@ async def test_full_api():
         # 4. Auth login
         res = await client.post(
             "/api/v1/auth/login",
-            json={"username": "admin", "password": "admin123!"},
+            json={"username": "thund3r", "password": "gusN#&#5ylJT*wl0*y"},
         )
         assert res.status_code == 200, f"Admin login failed: {res.text}"
         token = res.json()["access_token"]
@@ -49,7 +50,7 @@ async def test_full_api():
         # 5. Проверка /me
         res = await client.get("/api/v1/auth/me", headers=auth_headers)
         assert res.status_code == 200
-        assert res.json()["username"] == "admin"
+        assert res.json()["username"] == "thund3r"
         print("[OK] Auth: GET /api/v1/auth/me вернул профиль администратора.")
 
         # 6. Uploads - загрузка мок-файла логотипа

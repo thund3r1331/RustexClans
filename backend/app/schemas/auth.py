@@ -17,6 +17,11 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=4)
 
 
+class ChangePasswordRequest(BaseModel):
+    old_password: str = Field(..., min_length=4)
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     password: str = Field(..., min_length=6)
