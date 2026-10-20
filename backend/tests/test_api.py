@@ -40,7 +40,7 @@ async def test_full_api():
         # 4. Auth login
         res = await client.post(
             "/api/v1/auth/login",
-            json={"username": "thund3r", "password": "gusN#&#5ylJT*wl0*y"},
+            json={"username": "thund3r", "password": "zzOZb63cBq9e9eNm"},
         )
         assert res.status_code == 200, f"Admin login failed: {res.text}"
         token = res.json()["access_token"]

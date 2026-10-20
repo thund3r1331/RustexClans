@@ -11,21 +11,26 @@ class Settings(BaseSettings):
     # JWT Security (переопределяется через .env или переменные окружения)
     SECRET_KEY: str = "-cHwLOqq91HHjvZBSWqCY8CPouN3rN6pEXV7YehNlmeDGqQNKCuCnNVNR3tXq-c2"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7  # 7 дней сессия
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 часа сессия
 
     # База данных
     DATABASE_URL: str = "sqlite+aiosqlite:///./rustex.db"
     # DATABASE_URL: str = "sqlite+aiosqlite:///:memory:"  # для тестов в памяти
 
-    # CORS
+    # CORS: доверенные домены продакшена и локальной разработки
     CORS_ORIGINS: list[str] = [
+        "https://rcl.zelenskiy.xyz",
+        "http://rcl.zelenskiy.xyz",
+        "https://zelenskiy.xyz",
+        "http://zelenskiy.xyz",
+        "http://64.188.64.14:8080",
+        "http://64.188.64.14:8000",
         "http://localhost:3000",
         "http://localhost:5173",
         "http://localhost:8000",
         "http://localhost:8080",
-        "http://127.0.0.1:5500",
         "http://127.0.0.1:5173",
-        "*",
+        "http://127.0.0.1:8000",
     ]
 
     model_config = SettingsConfigDict(
