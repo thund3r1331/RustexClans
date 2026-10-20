@@ -45,11 +45,14 @@ async def login(
             detail=f"Слишком много неудачных попыток входа. IP заблокирован на {max(1, retry_after // 60)} мин.",
         )
 
-    query = select(User).where(User.username == login_data.username)
+    username = login_data.username.strip()
+    password = login_data.password.strip()
+
+    query = select(User).where(User.username == username)
     result = await db.execute(query)
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(login_data.password, user.hashed_password):
+    if not user or not verify_password(password, user.hashed_password):
         FAILED_ATTEMPTS[client_ip].append(now)
         # Искусственная задержка для предотвращения высокоскоростных атак
         await asyncio.sleep(1.0)

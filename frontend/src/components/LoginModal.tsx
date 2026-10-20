@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, AlertCircle } from 'lucide-react';
+import { X, Lock, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { User } from '../types';
 
 interface LoginModalProps {
@@ -13,6 +13,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +26,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       const res = await fetch('/api/v1/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), password }),
+        body: JSON.stringify({
+          username: username.trim(),
+          password: password.trim(),
+        }),
       });
 
       if (!res.ok) {
@@ -92,14 +96,28 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
           <div>
             <label className="block text-zinc-400 uppercase mb-1">Пароль:</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="••••••••"
-              className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white focus:outline-none focus:border-white/40"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="••••••••"
+                className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 pr-10 text-white focus:outline-none focus:border-white/40"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition p-0.5 cursor-pointer"
+                title={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
+            </div>
           </div>
 
           {error && (
