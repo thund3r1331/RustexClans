@@ -21,33 +21,40 @@ interface Preset {
 const SCORING_PRESETS: Preset[] = [
   {
     id: 'raid_above_win',
-    label: 'Победа над кланом выше',
-    delta: 10,
-    reason: 'Победа в онлайн-рейде над кланом выше в рейтинге (+10 CRL)',
-    badge: '+10 CRL',
-  },
-  {
-    id: 'raid_below_win',
-    label: 'Победа над кланом ниже',
-    delta: 5,
-    reason: 'Победа в онлайн-рейде над кланом ниже в рейтинге (+5 CRL)',
-    badge: '+5 CRL',
+    label: 'Победа: рейд клана выше',
+    delta: 20,
+    reason: 'Победа в онлайн-рейде над кланом выше в рейтинге (+20 CRL)',
+    badge: '+20 CRL',
   },
   {
     id: 'raid_above_loss',
-    label: 'Поражение клану выше',
-    delta: -5,
-    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-5 CRL)',
-    badge: '-5 CRL',
+    label: 'Поражение: клану выше',
+    delta: -20,
+    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-20 CRL)',
+    badge: '-20 CRL',
     isNegative: true,
   },
   {
+    id: 'raid_below_win',
+    label: 'Победа: рейд клана ниже',
+    delta: 15,
+    reason: 'Победа в онлайн-рейде над кланом ниже в рейтинге (+15 CRL)',
+    badge: '+15 CRL',
+  },
+  {
     id: 'raid_below_loss',
-    label: 'Поражение клану ниже',
-    delta: -10,
-    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-10 CRL)',
-    badge: '-10 CRL',
+    label: 'Поражение: клану ниже',
+    delta: -15,
+    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-15 CRL)',
+    badge: '-15 CRL',
     isNegative: true,
+  },
+  {
+    id: 'heli',
+    label: 'Забирание вертолёта',
+    delta: 7,
+    reason: 'Забирание патрульного вертолёта (+7 CRL)',
+    badge: '+7 CRL',
   },
   {
     id: 'crate',
@@ -59,9 +66,16 @@ const SCORING_PRESETS: Preset[] = [
   {
     id: 'rockets',
     label: 'Рекорды ракет',
-    delta: 10,
-    reason: 'Рекорд ракет при рейде (+10 CRL)',
-    badge: '+10 CRL',
+    delta: 3,
+    reason: 'Рекорд ракет при рейде (+3 CRL)',
+    badge: '+3 CRL',
+  },
+  {
+    id: 'top1',
+    label: 'Первое место в топе',
+    delta: 2,
+    reason: 'Заняли первое место в топе (+2 CRL)',
+    badge: '+2 CRL',
   },
 ];
 
@@ -72,8 +86,8 @@ export const AdjustModal: React.FC<AdjustModalProps> = ({
   onSuccess,
 }) => {
   const [selectedPreset, setSelectedPreset] = useState<string>('raid_above_win');
-  const [delta, setDelta] = useState<number>(10);
-  const [reason, setReason] = useState<string>('Победа в онлайн-рейде над кланом выше в рейтинге (+10 CRL)');
+  const [delta, setDelta] = useState<number>(20);
+  const [reason, setReason] = useState<string>('Победа в онлайн-рейде над кланом выше в рейтинге (+20 CRL)');
   const [proofUrl, setProofUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
