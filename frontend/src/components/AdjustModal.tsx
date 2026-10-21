@@ -29,9 +29,9 @@ const SCORING_PRESETS: Preset[] = [
   {
     id: 'raid_above_loss',
     label: 'Поражение: клану выше',
-    delta: -20,
-    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-20 CRL)',
-    badge: '-20 CRL',
+    delta: -15,
+    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-15 CRL)',
+    badge: '-15 CRL',
     isNegative: true,
   },
   {
@@ -44,9 +44,9 @@ const SCORING_PRESETS: Preset[] = [
   {
     id: 'raid_below_loss',
     label: 'Поражение: клану ниже',
-    delta: -15,
-    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-15 CRL)',
-    badge: '-15 CRL',
+    delta: -20,
+    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-20 CRL)',
+    badge: '-20 CRL',
     isNegative: true,
   },
   {

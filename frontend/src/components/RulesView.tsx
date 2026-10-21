@@ -19,7 +19,7 @@ export const RulesView: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Регламент и правила начисления очков</h2>
           <p className="text-xs text-zinc-500 font-mono mt-0.5">
-            Официальный соревновательный регламент RustexClans (CRL) • Лимит 1 000 CRL
+            Соревновательный регламент RustexClans (CRL) • Лимит 1 000 CRL
           </p>
         </div>
         <div className="flex items-center gap-2 font-mono text-xs">
@@ -56,7 +56,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Поражение: тебя зарейдил клан выше в топе</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Потеря мейн базы клану выше по рейтингу</span>
               </div>
-              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-20 CRL</span>
+              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-15 CRL</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04]">
@@ -70,9 +70,9 @@ export const RulesView: React.FC = () => {
             <div className="flex items-center justify-between p-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.04]">
               <div>
                 <span className="text-zinc-200 font-bold block">Поражение: тебя зарейдил клан ниже в топе</span>
-                <span className="text-[11px] text-zinc-500 font-sans">Потеря мейн базы клану ниже по рейтингу</span>
+                <span className="text-[11px] text-zinc-500 font-sans">Потеря мейн базы клану ниже по рейтингу (апсет)</span>
               </div>
-              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-15 CRL</span>
+              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-20 CRL</span>
             </div>
           </div>
         </div>
