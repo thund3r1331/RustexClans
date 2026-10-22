@@ -35,7 +35,20 @@ export interface User {
   id: number;
   username: string;
   role: string;
+  clan_id: number | null;
   is_active: boolean;
 }
 
-export type TabId = 'ladder' | 'podium' | 'raids' | 'rules';
+export interface Alliance {
+  id: number;
+  requester_clan_id: number;
+  requester_clan_name: string;
+  requester_clan_tag: string;
+  target_clan_id: number;
+  target_clan_name: string;
+  target_clan_tag: string;
+  status: 'pending' | 'accepted' | 'rejected';
+  created_at: string;
+}
+
+export type TabId = 'ladder' | 'podium' | 'raids' | 'rules' | 'alliances';

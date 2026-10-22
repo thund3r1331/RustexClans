@@ -6,19 +6,26 @@ import { LadderView } from './components/LadderView';
 import { PodiumView } from './components/PodiumView';
 import { RaidsView } from './components/RaidsView';
 import { RulesView } from './components/RulesView';
+import { AlliancesView } from './components/AlliancesView';
 import { ClanDetailModal } from './components/ClanDetailModal';
 import { AdjustModal } from './components/AdjustModal';
 import { CreateClanModal } from './components/CreateClanModal';
 import { DeleteClanModal } from './components/DeleteClanModal';
 import { LoginModal } from './components/LoginModal';
+import { RegisterModal } from './components/RegisterModal';
+import { AdminLeadersModal } from './components/AdminLeadersModal';
+import { EditRosterModal } from './components/EditRosterModal';
 import { ApplyModal } from './components/ApplyModal';
-import { Clan, RatingLog, User, TabId } from './types';
+import { Alliance, Clan, RatingLog, User, TabId } from './types';
 import { Trophy, RefreshCw } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [clans, setClans] = useState<Clan[]>([]);
   const [raids, setRaids] = useState<RatingLog[]>([]);
+  const [alliances, setAlliances] = useState<Alliance[]>([]);
+  const [myAlliances, setMyAlliances] = useState<Alliance[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [alliancesLoading, setAlliancesLoading] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<TabId>('ladder');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedTier, setSelectedTier] = useState<string>('');
@@ -26,9 +33,12 @@ export const App: React.FC = () => {
   // Modals state
   const [selectedClan, setSelectedClan] = useState<Clan | null>(null);
   const [clanForAdjust, setClanForAdjust] = useState<Clan | null>(null);
+  const [clanForRoster, setClanForRoster] = useState<Clan | null>(null);
   const [clanForDelete, setClanForDelete] = useState<Clan | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState<boolean>(false);
   const [isLoginOpen, setIsLoginOpen] = useState<boolean>(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState<boolean>(false);
+  const [isLeadersModalOpen, setIsLeadersModalOpen] = useState<boolean>(false);
   const [isApplyOpen, setIsApplyOpen] = useState<boolean>(false);
 
   // Auth state
@@ -68,6 +78,31 @@ export const App: React.FC = () => {
     }
   }, []);
 
+  // Fetch public alliances
+  const fetchAlliances = useCallback(async () => {
+    setAlliancesLoading(true);
+    try {
+      const res = await fetch('/api/v1/alliances/');
+      if (res.ok) setAlliances(await res.json());
+    } catch (err) {
+      console.error('Failed to load alliances', err);
+    } finally {
+      setAlliancesLoading(false);
+    }
+  }, []);
+
+  // Fetch my alliances (only when logged in as clan_leader)
+  const fetchMyAlliances = useCallback(async (jwt: string) => {
+    try {
+      const res = await fetch('/api/v1/alliances/my', {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      if (res.ok) setMyAlliances(await res.json());
+    } catch (err) {
+      console.error('Failed to load my alliances', err);
+    }
+  }, []);
+
   // Check auth user
   const checkAuth = useCallback(async (jwt: string) => {
     try {
@@ -77,6 +112,9 @@ export const App: React.FC = () => {
       if (res.ok) {
         const usr = await res.json();
         setUser(usr);
+        if (usr.role === 'clan_leader') {
+          fetchMyAlliances(jwt);
+        }
       } else {
         localStorage.removeItem('rustex_token');
         setToken(null);
@@ -87,7 +125,7 @@ export const App: React.FC = () => {
       setToken(null);
       setUser(null);
     }
-  }, []);
+  }, [fetchMyAlliances]);
 
   useEffect(() => {
     if (token) {
@@ -98,13 +136,13 @@ export const App: React.FC = () => {
   useEffect(() => {
     const loadAll = async () => {
       setLoading(true);
-      await Promise.all([fetchClans(), fetchRaids()]);
+      await Promise.all([fetchClans(), fetchRaids(), fetchAlliances()]);
       setLoading(false);
     };
     loadAll();
-  }, [fetchClans, fetchRaids]);
+  }, [fetchClans, fetchRaids, fetchAlliances]);
 
-  // Секретная комбинация "zxce" для открытия окна входа модератора
+  // Секретная комбинация "zxce" для открытия окна входа администратора/модератора
   useEffect(() => {
     const seq = [
       { code: 'KeyZ', en: 'z', ru: 'я' },
@@ -168,12 +206,61 @@ export const App: React.FC = () => {
     localStorage.setItem('rustex_token', jwt);
     setToken(jwt);
     setUser(usr);
+    if (usr.role === 'clan_leader') {
+      fetchMyAlliances(jwt);
+    }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('rustex_token');
     setToken(null);
     setUser(null);
+    setMyAlliances([]);
+  };
+
+  // Alliance actions
+  const handleAllianceRequest = async (targetClanId: number) => {
+    if (!token) return;
+    const res = await fetch('/api/v1/alliances/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ target_clan_id: targetClanId }),
+    });
+    if (!res.ok) {
+      const d = await res.json().catch(() => ({}));
+      throw new Error(typeof d.detail === 'string' ? d.detail : 'Ошибка отправки запроса');
+    }
+    await fetchMyAlliances(token);
+    await fetchAlliances();
+  };
+
+  const handleAllianceAccept = async (id: number) => {
+    if (!token) return;
+    await fetch(`/api/v1/alliances/${id}/accept`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await fetchMyAlliances(token);
+    await fetchAlliances();
+  };
+
+  const handleAllianceReject = async (id: number) => {
+    if (!token) return;
+    await fetch(`/api/v1/alliances/${id}/reject`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await fetchMyAlliances(token);
+  };
+
+  const handleAllianceDelete = async (id: number) => {
+    if (!token) return;
+    await fetch(`/api/v1/alliances/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    await fetchMyAlliances(token);
+    await fetchAlliances();
   };
 
   const top1Clan = clans[0];
@@ -188,6 +275,15 @@ export const App: React.FC = () => {
         user={user}
         onLogout={handleLogout}
         onOpenCreateClan={() => setIsCreateOpen(true)}
+        onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenRegister={() => setIsRegisterOpen(true)}
+        onOpenAdminLeaders={() => setIsLeadersModalOpen(true)}
+        onOpenMyClan={() => {
+          if (user?.clan_id) {
+            const found = clans.find((c) => c.id === user.clan_id);
+            if (found) setSelectedClan(found);
+          }
+        }}
       />
 
       <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-8">
@@ -216,6 +312,7 @@ export const App: React.FC = () => {
                 onClick={() => {
                   fetchClans();
                   fetchRaids();
+                  fetchAlliances();
                 }}
                 className="p-1 rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] text-zinc-400 hover:text-white transition cursor-pointer"
                 title="Обновить данные"
@@ -238,21 +335,21 @@ export const App: React.FC = () => {
 
             {/* Quick Summary Stats */}
             <div className="grid grid-cols-3 gap-3 w-full sm:w-auto shrink-0 font-mono text-xs">
-              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[105px]">
+              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[90px]">
                 <span className="text-[10px] text-zinc-500 uppercase block mb-1">КЛАНОВ</span>
                 <span className="text-2xl font-bold text-white tabular-nums">{clans.length}</span>
               </div>
 
-              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[105px]">
-                <span className="text-[10px] text-zinc-500 uppercase block mb-1">ТОП-1 CRL</span>
+              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[90px]">
+                <span className="text-[10px] text-zinc-500 uppercase block mb-1">ТОП-1</span>
                 <span className="text-2xl font-bold text-white tabular-nums">
                   {top1Clan?.points ? top1Clan.points.toLocaleString('ru-RU') : '-'}
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[105px]">
-                <span className="text-[10px] text-zinc-500 uppercase block mb-1">РЕЙДОВ</span>
-                <span className="text-2xl font-bold text-white tabular-nums">{raids.length}</span>
+              <div className="p-4 rounded-2xl border border-white/[0.06] bg-white/[0.02] text-center min-w-[90px]">
+                <span className="text-[10px] text-zinc-500 uppercase block mb-1">АЛЬЯНСОВ</span>
+                <span className="text-2xl font-bold text-white tabular-nums">{alliances.length}</span>
               </div>
             </div>
           </div>
@@ -272,6 +369,7 @@ export const App: React.FC = () => {
           {activeTab === 'ladder' && (
             <LadderView
               clans={clans}
+              alliances={alliances}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               selectedTier={selectedTier}
@@ -279,6 +377,7 @@ export const App: React.FC = () => {
               user={user}
               onSelectClan={(c) => setSelectedClan(c)}
               onOpenAdjust={(c) => setClanForAdjust(c)}
+              onOpenEditRoster={(c) => setClanForRoster(c)}
               onDeleteClan={(c) => setClanForDelete(c)}
             />
           )}
@@ -292,6 +391,20 @@ export const App: React.FC = () => {
 
           {activeTab === 'raids' && (
             <RaidsView logs={raids} loading={loading} />
+          )}
+
+          {activeTab === 'alliances' && (
+            <AlliancesView
+              alliances={alliances}
+              clans={clans}
+              user={user}
+              myAlliances={myAlliances}
+              onRequest={handleAllianceRequest}
+              onAccept={handleAllianceAccept}
+              onReject={handleAllianceReject}
+              onDelete={handleAllianceDelete}
+              loading={alliancesLoading}
+            />
           )}
 
           {activeTab === 'rules' && <RulesView />}
@@ -309,10 +422,12 @@ export const App: React.FC = () => {
       {selectedClan && (
         <ClanDetailModal
           clan={selectedClan}
+          currentUser={user}
           onClose={() => setSelectedClan(null)}
           onOpenAdjust={(c) => setClanForAdjust(c)}
+          onOpenEditRoster={(c) => setClanForRoster(c)}
           onDeleteClan={(c) => setClanForDelete(c)}
-          isModerator={!!user}
+          isModerator={!!(user && (user.role === 'admin' || user.role === 'moderator'))}
         />
       )}
 
@@ -360,8 +475,44 @@ export const App: React.FC = () => {
         />
       )}
 
+      {isRegisterOpen && (
+        <RegisterModal
+          onClose={() => setIsRegisterOpen(false)}
+          onSuccess={() => {
+            // После регистрации сразу открываем логин
+            setIsLoginOpen(true);
+          }}
+        />
+      )}
+
+      {isLeadersModalOpen && (
+        <AdminLeadersModal
+          token={token}
+          clans={clans}
+          onClose={() => {
+            setIsLeadersModalOpen(false);
+            fetchClans();
+            if (token) checkAuth(token);
+          }}
+        />
+      )}
+
       {isApplyOpen && (
         <ApplyModal onClose={() => setIsApplyOpen(false)} />
+      )}
+
+      {clanForRoster && (
+        <EditRosterModal
+          clan={clanForRoster}
+          token={token}
+          onClose={() => setClanForRoster(null)}
+          onSuccess={(updated) => {
+            fetchClans();
+            if (selectedClan?.id === updated.id) {
+              setSelectedClan(updated);
+            }
+          }}
+        />
       )}
     </div>
   );

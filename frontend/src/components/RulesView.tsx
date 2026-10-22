@@ -19,15 +19,15 @@ export const RulesView: React.FC = () => {
         <div>
           <h2 className="text-xl font-bold text-white tracking-tight">Регламент и правила начисления очков</h2>
           <p className="text-xs text-zinc-500 font-mono mt-0.5">
-            Соревновательный регламент RustexClans (CRL) • Лимит 1 000 CRL
+            Соревновательный регламент RustexClans • Лимит 1 000 RCL POINTS
           </p>
         </div>
         <div className="flex items-center gap-2 font-mono text-xs">
           <span className="px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 font-bold">
-            MAX: 1 000 CRL
+            MAX: 1 000 RCL POINTS
           </span>
           <span className="px-3 py-1 rounded-full border border-white/10 bg-white/[0.03] text-zinc-400">
-            START: 0 CRL
+            START: 0 RCL POINTS
           </span>
         </div>
       </div>
@@ -48,7 +48,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-white font-bold block">Победа: рейд клана выше твоего в топе</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Успешный рейд соперника с более высоким рейтингом</span>
               </div>
-              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+20 CRL</span>
+              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+20 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.04]">
@@ -56,7 +56,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Поражение: тебя зарейдил клан выше в топе</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Потеря мейн базы клану выше по рейтингу</span>
               </div>
-              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-15 CRL</span>
+              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-15 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.04]">
@@ -64,7 +64,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-white font-bold block">Победа: рейд клана ниже твоего в топе</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Успешный рейд соперника с более низким рейтингом</span>
               </div>
-              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+15 CRL</span>
+              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+15 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-rose-500/20 bg-rose-500/[0.04]">
@@ -72,7 +72,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Поражение: тебя зарейдил клан ниже в топе</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Потеря мейн базы клану ниже по рейтингу (апсет)</span>
               </div>
-              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-20 CRL</span>
+              <span className="text-rose-400 font-bold text-sm shrink-0 ml-3">-20 RCL POINTS</span>
             </div>
           </div>
         </div>
@@ -92,7 +92,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Забирание вертолёта</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Сбитие и успешное удержание ящиков патрульного вертолёта</span>
               </div>
-              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+7 CRL</span>
+              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+7 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-white/[0.015]">
@@ -100,7 +100,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Забирание крейта</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Успешный захват и лут крейта при активном онлайне сервера</span>
               </div>
-              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+5 CRL</span>
+              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+5 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-white/[0.06] bg-white/[0.015]">
@@ -108,7 +108,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-zinc-200 font-bold block">Рекорды ракет</span>
                 <span className="text-[11px] text-zinc-500 font-sans">Установление подтвержденного рекорда выпущенных ракет при рейде</span>
               </div>
-              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+3 CRL</span>
+              <span className="text-emerald-400 font-bold text-sm shrink-0 ml-3">+3 RCL POINTS</span>
             </div>
 
             <div className="flex items-center justify-between p-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.04]">
@@ -116,7 +116,7 @@ export const RulesView: React.FC = () => {
                 <span className="text-amber-300 font-bold block">Заняли первое место в топе</span>
                 <span className="text-[11px] text-zinc-400 font-sans">Бонус за взятие строчки #1 в ладдере</span>
               </div>
-              <span className="text-amber-400 font-bold text-sm shrink-0 ml-3">+2 CRL</span>
+              <span className="text-amber-400 font-bold text-sm shrink-0 ml-3">+2 RCL POINTS</span>
             </div>
           </div>
         </div>
@@ -200,7 +200,7 @@ export const RulesView: React.FC = () => {
                   rel="noopener noreferrer"
                   className="text-white underline font-bold hover:text-indigo-300"
                 >
-                  Discord-сервер CRL
+                  Discord-сервер RCL
                 </a>
                 . Без видеозаписи начисление очков не производится.
               </p>

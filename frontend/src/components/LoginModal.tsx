@@ -76,8 +76,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <Lock className="w-4 h-4 text-zinc-300" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white tracking-tight">Вход модератора</h3>
-            <p className="text-[11px] text-zinc-500 font-mono">Доступ к корректировке очков</p>
+            <h3 className="text-lg font-bold text-white tracking-tight">Вход в аккаунт</h3>
+            <p className="text-[11px] text-zinc-500 font-mono">Лидеры кланов · Модераторы</p>
           </div>
         </div>
 

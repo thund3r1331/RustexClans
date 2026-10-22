@@ -17,6 +17,11 @@ class LoginRequest(BaseModel):
     password: str = Field(..., min_length=4)
 
 
+class RegisterRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+    password: str = Field(..., min_length=6, max_length=128)
+
+
 class ChangePasswordRequest(BaseModel):
     old_password: str = Field(..., min_length=4)
     new_password: str = Field(..., min_length=8, max_length=128)
@@ -28,10 +33,15 @@ class UserCreate(BaseModel):
     role: str = Field(default="moderator", pattern="^(admin|moderator)$")
 
 
+class AssignClanRequest(BaseModel):
+    clan_id: int | None = None
+
+
 class UserResponse(BaseModel):
     id: int
     username: str
     role: str
+    clan_id: int | None = None
     is_active: bool
     created_at: datetime
 

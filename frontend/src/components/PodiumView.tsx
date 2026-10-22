@@ -114,14 +114,14 @@ export const PodiumView: React.FC<PodiumViewProps> = ({ clans, onSelectClan }) =
         {/* Points & Delta Footer */}
         <div className="mt-6 pt-4 border-t border-white/[0.06] flex items-center justify-between font-mono">
           <div>
-            <span className="text-[10px] text-zinc-500 uppercase block">ОЧКИ CRL</span>
+            <span className="text-[10px] text-zinc-500 uppercase block">RCL POINTS</span>
             <span className="text-xl font-bold text-white tabular-nums">
               {clan.points.toLocaleString('ru-RU')}
-              <span className="text-xs text-zinc-500 font-normal ml-1">CRL</span>
+              <span className="text-xs text-zinc-500 font-normal ml-1">RCL POINTS</span>
             </span>
           </div>
 
-          <div>
+          <div className="flex items-center gap-2">
             {clan.rank_change > 0 && (
               <span className="px-2.5 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-bold">
                 +{clan.rank_change}
@@ -139,6 +139,13 @@ export const PodiumView: React.FC<PodiumViewProps> = ({ clans, onSelectClan }) =
             )}
           </div>
         </div>
+
+        <button
+          onClick={() => onSelectClan(clan)}
+          className="mt-3 w-full text-center text-xs font-sans text-zinc-500 hover:text-white transition py-1.5 rounded-xl border border-white/[0.04] hover:border-white/[0.12] hover:bg-white/[0.03] cursor-pointer"
+        >
+          подробнее →
+        </button>
       </div>
     );
   };

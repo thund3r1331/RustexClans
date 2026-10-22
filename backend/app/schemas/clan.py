@@ -27,6 +27,11 @@ class ClanUpdate(BaseModel):
     is_active: bool | None = None
 
 
+class ClanRosterUpdate(BaseModel):
+    roster: str | None = Field(None, description="Список никнеймов игроков через запятую")
+    members: list[str] | None = Field(None, description="Список никнеймов игроков")
+
+
 class ClanRatingAdjust(BaseModel):
     delta: int = Field(..., description="Изменение очков CRL, например +10 или -10")
     reason: str = Field(..., min_length=3, description="Обоснование / тема заявки с почты")

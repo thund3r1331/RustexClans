@@ -18,13 +18,6 @@ def determine_tier(rank: int, points: int) -> str:
 
 
 async def recalculate_all_clan_ranks(session: AsyncSession) -> None:
-    """
-    Пересчитывает абсолютные ранги, дельту мест (+/-) и тиры для всех активных кланов.
-    Сортировка:
-    1. По очкам убывания (максимум 1000 CRL)
-    2. При равенстве очков: выше тот клан, у которого текущее количество очков стало раньше (points_reached_at.asc())
-    3. По ID клана (детерминированный fallback)
-    """
     query = (
         select(Clan)
         .where(Clan.is_active == True)
@@ -36,7 +29,6 @@ async def recalculate_all_clan_ranks(session: AsyncSession) -> None:
     for new_rank_idx, clan in enumerate(clans, start=1):
         old_rank = clan.rank
         
-        # Если клан уже имел ранг, считаем дельту (old_rank - new_rank: было 5 стало 3 => +2)
         if old_rank > 0:
             clan.rank_change = old_rank - new_rank_idx
         else:

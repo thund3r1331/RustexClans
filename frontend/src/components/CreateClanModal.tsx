@@ -207,8 +207,8 @@ export const CreateClanModal: React.FC<CreateClanModalProps> = ({
 
           <div>
             <div className="flex items-center justify-between text-zinc-400 uppercase mb-1">
-              <label>Стартовые очки (CRL):</label>
-              <span className="text-[10px] text-zinc-500 font-sans">Старт 0, максимум 1 000 CRL</span>
+              <label>Стартовые очки (RCL POINTS):</label>
+              <span className="text-[10px] text-zinc-500 font-sans">Старт 0, максимум 1 000 RCL POINTS</span>
             </div>
             <input
               type="number"

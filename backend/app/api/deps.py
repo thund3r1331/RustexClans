@@ -68,3 +68,18 @@ async def require_admin(user: User = Depends(get_current_user)) -> User:
             detail="Требуются права администратора",
         )
     return user
+
+
+async def require_clan_leader(user: User = Depends(get_current_user)) -> User:
+    """Лидер клана с привязкой к конкретному клану."""
+    if user.role != "clan_leader":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Требуются права лидера клана",
+        )
+    if user.clan_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Ваш аккаунт ещё не привязан к клану. Обратитесь к администратору.",
+        )
+    return user

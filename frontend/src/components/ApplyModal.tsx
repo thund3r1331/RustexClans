@@ -10,15 +10,15 @@ export const ApplyModal: React.FC<ApplyModalProps> = ({ onClose }) => {
   const [copiedTemplate, setCopiedTemplate] = useState(false);
 
   const email = 'aresckoy@gmail.com';
-  const emailSubject = 'Заявка на начисление CRL // Соревновательный ладдер';
+  const emailSubject = 'Заявка на начисление RCL POINTS // Соревновательный ладдер';
   const emailTemplate = `1. Название и тег клана: [TAG] Название клана
 2. Тип события (отметьте нужное):
-   [ ] Победа: рейд клана выше рейтинга (+10 CRL)
-   [ ] Победа: рейд клана ниже рейтинга (+5 CRL)
-   [ ] Поражение: клану выше рейдера в рейтинге (-5 CRL)
-   [ ] Поражение: клану ниже рейдера в рейтинге (-10 CRL)
-   [ ] Забирание крейта (+5 CRL)
-   [ ] Рекорды ракет (при рейде) (+10 CRL)
+   [ ] Победа: рейд клана выше рейтинга (+10 RCL POINTS)
+   [ ] Победа: рейд клана ниже рейтинга (+5 RCL POINTS)
+   [ ] Поражение: клану выше рейдера в рейтинге (-5 RCL POINTS)
+   [ ] Поражение: клану ниже рейдера в рейтинге (-10 RCL POINTS)
+   [ ] Забирание крейта (+5 RCL POINTS)
+   [ ] Рекорды ракет (при рейде) (+10 RCL POINTS)
 3. Против кого / локация (тег клана соперника или монумент): 
 4. Ссылка на видеодоказательство (YouTube / Rutube / Twitch): https://...
 5. Таймкоды ключевых моментов (шкаф, выбивание, лут крейта, ракеты): 
@@ -87,33 +87,33 @@ export const ApplyModal: React.FC<ApplyModalProps> = ({ onClose }) => {
         {/* Scoring Rules Quick Grid */}
         <div className="space-y-1.5 font-mono text-xs">
           <div className="flex items-center justify-between text-[11px] text-zinc-400">
-            <span className="uppercase">Регламент очков CRL:</span>
-            <span className="text-emerald-400 font-bold">Лимит: 1 000 CRL</span>
+            <span className="uppercase">Регламент очков RCL POINTS:</span>
+            <span className="text-emerald-400 font-bold">Лимит: 1 000 RCL POINTS</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-xs">
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Победа: рейд клана выше</span>
-              <span className="text-emerald-400 font-bold text-xs">+10 CRL</span>
+              <span className="text-emerald-400 font-bold text-xs">+10 RCL POINTS</span>
             </div>
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Победа: рейд клана ниже</span>
-              <span className="text-emerald-400 font-bold text-xs">+5 CRL</span>
+              <span className="text-emerald-400 font-bold text-xs">+5 RCL POINTS</span>
             </div>
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Поражение клану выше</span>
-              <span className="text-rose-400 font-bold text-xs">-5 CRL</span>
+              <span className="text-rose-400 font-bold text-xs">-5 RCL POINTS</span>
             </div>
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Поражение клану ниже</span>
-              <span className="text-rose-400 font-bold text-xs">-10 CRL</span>
+              <span className="text-rose-400 font-bold text-xs">-10 RCL POINTS</span>
             </div>
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Забирание крейта (онлайн)</span>
-              <span className="text-emerald-400 font-bold text-xs">+5 CRL</span>
+              <span className="text-emerald-400 font-bold text-xs">+5 RCL POINTS</span>
             </div>
             <div className="p-2.5 rounded-xl border border-white/[0.06] bg-white/[0.02]">
               <span className="text-zinc-400 text-[10px] block font-sans">Рекорды ракет (при рейде)</span>
-              <span className="text-emerald-400 font-bold text-xs">+10 CRL</span>
+              <span className="text-emerald-400 font-bold text-xs">+10 RCL POINTS</span>
             </div>
           </div>
         </div>

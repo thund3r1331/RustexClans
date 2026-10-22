@@ -19,6 +19,11 @@ async def lifespan(app: FastAPI):
     # 1. Автоматическое создание всех таблиц при старте (если не созданы)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        try:
+            from sqlalchemy import text
+            await conn.execute(text("ALTER TABLE users ADD COLUMN clan_id INTEGER REFERENCES clans(id) ON DELETE SET NULL"))
+        except Exception:
+            pass
 
     # 2. Пересчитываем ранги кланов
     async with AsyncSessionLocal() as session:

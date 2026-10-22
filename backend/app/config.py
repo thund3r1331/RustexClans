@@ -14,8 +14,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 часа сессия
 
     # База данных
-    DATABASE_URL: str = "sqlite+aiosqlite:///./rustex.db"
-    # DATABASE_URL: str = "sqlite+aiosqlite:///:memory:"  # для тестов в памяти
+    DATABASE_URL: str = f"sqlite+aiosqlite:///{(Path(__file__).resolve().parent.parent / 'rustex.db').as_posix()}"
 
     # CORS: доверенные домены продакшена и локальной разработки
     CORS_ORIGINS: list[str] = [

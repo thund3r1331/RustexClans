@@ -23,59 +23,59 @@ const SCORING_PRESETS: Preset[] = [
     id: 'raid_above_win',
     label: 'Победа: рейд клана выше',
     delta: 20,
-    reason: 'Победа в онлайн-рейде над кланом выше в рейтинге (+20 CRL)',
-    badge: '+20 CRL',
+    reason: 'Победа в онлайн-рейде над кланом выше в рейтинге (+20 RCL POINTS)',
+    badge: '+20 RCL POINTS',
   },
   {
     id: 'raid_above_loss',
     label: 'Поражение: клану выше',
     delta: -15,
-    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-15 CRL)',
-    badge: '-15 CRL',
+    reason: 'Поражение в онлайн-рейде клану выше рейдера в рейтинге (-15 RCL POINTS)',
+    badge: '-15 RCL POINTS',
     isNegative: true,
   },
   {
     id: 'raid_below_win',
     label: 'Победа: рейд клана ниже',
     delta: 15,
-    reason: 'Победа в онлайн-рейде над кланом ниже в рейтинге (+15 CRL)',
-    badge: '+15 CRL',
+    reason: 'Победа в онлайн-рейде над кланом ниже в рейтинге (+15 RCL POINTS)',
+    badge: '+15 RCL POINTS',
   },
   {
     id: 'raid_below_loss',
     label: 'Поражение: клану ниже',
     delta: -20,
-    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-20 CRL)',
-    badge: '-20 CRL',
+    reason: 'Поражение в онлайн-рейде клану ниже рейдера в рейтинге (-20 RCL POINTS)',
+    badge: '-20 RCL POINTS',
     isNegative: true,
   },
   {
     id: 'heli',
     label: 'Забирание вертолёта',
     delta: 7,
-    reason: 'Забирание патрульного вертолёта (+7 CRL)',
-    badge: '+7 CRL',
+    reason: 'Забирание патрульного вертолёта (+7 RCL POINTS)',
+    badge: '+7 RCL POINTS',
   },
   {
     id: 'crate',
     label: 'Забирание крейта',
     delta: 5,
-    reason: 'Забирание крейта при активном онлайне (+5 CRL)',
-    badge: '+5 CRL',
+    reason: 'Забирание крейта при активном онлайне (+5 RCL POINTS)',
+    badge: '+5 RCL POINTS',
   },
   {
     id: 'rockets',
     label: 'Рекорды ракет',
     delta: 3,
-    reason: 'Рекорд ракет при рейде (+3 CRL)',
-    badge: '+3 CRL',
+    reason: 'Рекорд ракет при рейде (+3 RCL POINTS)',
+    badge: '+3 RCL POINTS',
   },
   {
     id: 'top1',
     label: 'Первое место в топе',
     delta: 2,
-    reason: 'Заняли первое место в топе (+2 CRL)',
-    badge: '+2 CRL',
+    reason: 'Заняли первое место в топе (+2 RCL POINTS)',
+    badge: '+2 RCL POINTS',
   },
 ];
 
@@ -87,7 +87,7 @@ export const AdjustModal: React.FC<AdjustModalProps> = ({
 }) => {
   const [selectedPreset, setSelectedPreset] = useState<string>('raid_above_win');
   const [delta, setDelta] = useState<number>(20);
-  const [reason, setReason] = useState<string>('Победа в онлайн-рейде над кланом выше в рейтинге (+20 CRL)');
+  const [reason, setReason] = useState<string>('Победа в онлайн-рейде над кланом выше в рейтинге (+20 RCL POINTS)');
   const [proofUrl, setProofUrl] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -209,7 +209,7 @@ export const AdjustModal: React.FC<AdjustModalProps> = ({
 
           <div>
             <label className="block text-zinc-400 uppercase mb-1">
-              Дельта очков (+/- CRL):
+              Дельта очков (+/- RCL POINTS):
             </label>
             <input
               type="number"
@@ -222,8 +222,8 @@ export const AdjustModal: React.FC<AdjustModalProps> = ({
               className="w-full bg-white/[0.03] border border-white/[0.1] rounded-xl px-3 py-2 text-white text-sm focus:outline-none focus:border-white/40"
             />
             <div className="flex items-center justify-between text-[11px] text-zinc-500 mt-1.5">
-              <span>Текущие: <b className="text-zinc-300">{currentPoints} CRL</b></span>
-              <span>Итоговые: <b className="text-white font-bold">{projectedPoints} CRL</b> <span className="text-[10px] text-zinc-500">(макс. 1 000)</span></span>
+              <span>Текущие: <b className="text-zinc-300">{currentPoints} RCL POINTS</b></span>
+              <span>Итоговые: <b className="text-white font-bold">{projectedPoints} RCL POINTS</b> <span className="text-[10px] text-zinc-500">(макс. 1 000)</span></span>
             </div>
           </div>
 

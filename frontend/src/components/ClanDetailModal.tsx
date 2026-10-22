@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { X, Users, TrendingUp, Trophy, Edit3, Trash2 } from 'lucide-react';
-import { Clan, RatingLog } from '../types';
+import { X, Users, TrendingUp, Trophy, Edit3, Trash2, Handshake, UserPlus } from 'lucide-react';
+import { Alliance, Clan, RatingLog, User } from '../types';
 import { ClanLogo } from './ClanLogo';
 import {
   Chart as ChartJS,
@@ -26,21 +26,32 @@ ChartJS.register(
 
 interface ClanDetailModalProps {
   clan: Clan | null;
+  currentUser?: User | null;
   onClose: () => void;
   onOpenAdjust?: (clan: Clan) => void;
+  onOpenEditRoster?: (clan: Clan) => void;
   onDeleteClan?: (clan: Clan) => void;
   isModerator?: boolean;
 }
 
 export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
   clan,
+  currentUser,
   onClose,
   onOpenAdjust,
+  onOpenEditRoster,
   onDeleteClan,
   isModerator,
 }) => {
+  const isLeaderOfThisClan = !!(
+    currentUser &&
+    currentUser.role === 'clan_leader' &&
+    currentUser.clan_id === clan?.id
+  );
+  const canEditRoster = !!(isModerator || isLeaderOfThisClan);
   const [history, setHistory] = useState<RatingLog[]>([]);
   const [loadingHistory, setLoadingHistory] = useState<boolean>(false);
+  const [clanAlliances, setClanAlliances] = useState<Alliance[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -61,7 +72,20 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
       }
     };
 
+    const fetchAlliances = async () => {
+      try {
+        const res = await fetch(`/api/v1/alliances/clan/${clan.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setClanAlliances(data);
+        }
+      } catch (err) {
+        console.error('Failed to load clan alliances', err);
+      }
+    };
+
     fetchHistory();
+    fetchAlliances();
   }, [clan]);
 
   // Handle Escape key
@@ -126,7 +150,7 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
         titleFont: { family: 'JetBrains Mono', size: 10 },
         bodyFont: { family: 'JetBrains Mono', size: 12, weight: 'bold' },
         callbacks: {
-          label: (ctx: any) => `${ctx.raw} CRL`,
+          label: (ctx: any) => `${ctx.raw} RCL POINTS`,
         },
       },
     },
@@ -181,7 +205,7 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
                 <span>РАНГ: <b className="text-white">#{clan.rank}</b></span>
               </span>
               <span className="text-zinc-700">•</span>
-              <span>ОЧКИ: <b className="text-white">{clan.points.toLocaleString('ru-RU')} CRL</b></span>
+              <span>ОЧКИ: <b className="text-white">{clan.points.toLocaleString('ru-RU')} RCL POINTS</b></span>
               <span className="text-zinc-700">•</span>
               <span>ТИР: <b className="text-zinc-200">{clan.tier}</b></span>
             </div>
@@ -193,7 +217,7 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
           <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
             <span className="flex items-center gap-1.5 uppercase tracking-wider">
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>ДИНАМИКА ФОРМЫ (CRL RATING)</span>
+              <span>ДИНАМИКА ФОРМЫ (RCL POINTS)</span>
             </span>
           </div>
 
@@ -215,7 +239,22 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
               <Users className="w-3.5 h-3.5" />
               <span>СОСТАВ КЛАНА</span>
             </span>
-            <span>{clan.members.length} игроков</span>
+            <div className="flex items-center gap-2">
+              <span>{clan.members.length} игроков</span>
+              {canEditRoster && onOpenEditRoster && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenEditRoster(clan);
+                  }}
+                  className="flex items-center gap-1 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 text-[10px] font-sans font-medium transition cursor-pointer"
+                  title="Изменить состав клана"
+                >
+                  <UserPlus className="w-3 h-3" />
+                  <span>Изменить состав</span>
+                </button>
+              )}
+            </div>
           </div>
 
           {clan.members.length === 0 ? (
@@ -237,10 +276,46 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
           )}
         </div>
 
+        {/* Alliances Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-[11px] font-mono text-zinc-500">
+            <span className="flex items-center gap-1.5 uppercase tracking-wider">
+              <Handshake className="w-3.5 h-3.5" />
+              <span>АЛЬЯНСЫ КЛАНА</span>
+            </span>
+            <span>{clanAlliances.length} союзников</span>
+          </div>
+
+          {clanAlliances.length === 0 ? (
+            <div className="p-3 rounded-xl border border-white/[0.04] bg-white/[0.01] text-xs text-zinc-600 font-mono">
+              Клан не состоит в альянсах
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {clanAlliances.map((a) => {
+                const allyTag =
+                  a.requester_clan_id === clan.id ? a.target_clan_tag : a.requester_clan_tag;
+                const allyName =
+                  a.requester_clan_id === clan.id ? a.target_clan_name : a.requester_clan_name;
+                return (
+                  <div
+                    key={a.id}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/25 bg-emerald-500/10 text-xs font-mono text-emerald-300"
+                  >
+                    <Handshake className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="font-bold">[{allyTag}]</span>
+                    <span className="text-zinc-300">{allyName}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
         {/* Footer Actions */}
-        {isModerator && (
+        {(isModerator || isLeaderOfThisClan) && (
           <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-3">
-            {onDeleteClan && (
+            {isModerator && onDeleteClan && (
               <button
                 onClick={() => {
                   onClose();
@@ -253,18 +328,33 @@ export const ClanDetailModal: React.FC<ClanDetailModalProps> = ({
               </button>
             )}
 
-            {onOpenAdjust && (
-              <button
-                onClick={() => {
-                  onClose();
-                  onOpenAdjust(clan);
-                }}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans ml-auto"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>Скорректировать очки</span>
-              </button>
-            )}
+            <div className="flex items-center gap-2 ml-auto">
+              {canEditRoster && onOpenEditRoster && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenEditRoster(clan);
+                  }}
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold text-xs transition cursor-pointer font-sans"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Состав</span>
+                </button>
+              )}
+
+              {isModerator && onOpenAdjust && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenAdjust(clan);
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition shadow cursor-pointer font-sans"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Скорректировать очки</span>
+                </button>
+              )}
+            </div>
           </div>
         )}
       </div>

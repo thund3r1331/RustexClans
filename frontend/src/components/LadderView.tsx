@@ -1,10 +1,11 @@
 import React from 'react';
-import { Search, SlidersHorizontal, Info, Edit3, Trash2 } from 'lucide-react';
-import { Clan, User } from '../types';
+import { Search, SlidersHorizontal, Info, Edit3, Trash2, Handshake, Users } from 'lucide-react';
+import { Alliance, Clan, User } from '../types';
 import { ClanLogo } from './ClanLogo';
 
 interface LadderViewProps {
   clans: Clan[];
+  alliances?: Alliance[];
   searchQuery: string;
   onSearchChange: (q: string) => void;
   selectedTier: string;
@@ -12,11 +13,13 @@ interface LadderViewProps {
   user: User | null;
   onSelectClan: (clan: Clan) => void;
   onOpenAdjust: (clan: Clan) => void;
+  onOpenEditRoster?: (clan: Clan) => void;
   onDeleteClan?: (clan: Clan) => void;
 }
 
 export const LadderView: React.FC<LadderViewProps> = ({
   clans,
+  alliances = [],
   searchQuery,
   onSearchChange,
   selectedTier,
@@ -24,6 +27,7 @@ export const LadderView: React.FC<LadderViewProps> = ({
   user,
   onSelectClan,
   onOpenAdjust,
+  onOpenEditRoster,
   onDeleteClan,
 }) => {
   const tiers = [
@@ -118,11 +122,39 @@ export const LadderView: React.FC<LadderViewProps> = ({
                 >
                   <ClanLogo logoUrl={c.logo_url} sizeClass="w-10 h-10 rounded-xl" iconSizeClass="w-4 h-4" />
                   <div>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="font-bold text-sm text-white hover:underline transition">
                         {c.name}
                       </span>
                       <span className="font-mono text-xs text-zinc-400">[{c.tag}]</span>
+
+                      {/* Альянс бейджи */}
+                      {alliances
+                        .filter(
+                          (a) =>
+                            a.status === 'accepted' &&
+                            (a.requester_clan_id === c.id || a.target_clan_id === c.id)
+                        )
+                        .map((a) => {
+                          const allyTag =
+                            a.requester_clan_id === c.id
+                              ? a.target_clan_tag
+                              : a.requester_clan_tag;
+                          const allyName =
+                            a.requester_clan_id === c.id
+                              ? a.target_clan_name
+                              : a.requester_clan_name;
+                          return (
+                            <span
+                              key={a.id}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-mono font-medium"
+                              title={`В альянсе с ${allyName} [${allyTag}]`}
+                            >
+                              <Handshake className="w-2.5 h-2.5" />
+                              <span>союз: [{allyTag}]</span>
+                            </span>
+                          );
+                        })}
                     </div>
                     <div className="flex items-center gap-2 mt-0.5">
                       <span className="text-[10px] font-mono text-zinc-400 uppercase">
@@ -161,7 +193,7 @@ export const LadderView: React.FC<LadderViewProps> = ({
                   <span className="font-bold text-white text-sm tabular-nums">
                     {c.points.toLocaleString('ru-RU')}
                   </span>
-                  <span className="text-[10px] text-zinc-500 ml-1">CRL</span>
+                  <span className="text-[10px] text-zinc-500 ml-1">RCL POINTS</span>
                 </div>
 
                 {/* Action buttons */}
@@ -171,10 +203,22 @@ export const LadderView: React.FC<LadderViewProps> = ({
                     className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.08] transition text-xs cursor-pointer font-sans"
                   >
                     <Info className="w-3 h-3" />
-                    <span>Инфо</span>
+                    <span>подробнее</span>
                   </button>
 
-                  {user && (
+                  {/* Кнопка управления составом для лидера клана или модератора */}
+                  {onOpenEditRoster && user && (user.role === 'admin' || user.role === 'moderator' || (user.role === 'clan_leader' && user.clan_id === c.id)) && (
+                    <button
+                      onClick={() => onOpenEditRoster(c)}
+                      className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 font-semibold text-xs transition shadow cursor-pointer font-sans"
+                      title="Управление составом клана"
+                    >
+                      <Users className="w-3 h-3" />
+                      <span>Состав</span>
+                    </button>
+                  )}
+
+                  {user && (user.role === 'admin' || user.role === 'moderator') && (
                     <>
                       <button
                         onClick={() => onOpenAdjust(c)}

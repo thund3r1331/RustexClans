@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+from app.api.alliances import router as alliances_router
 from app.api.audit import router as audit_router
 from app.api.auth import router as auth_router
 from app.api.clans import router as clans_router
@@ -14,3 +15,4 @@ api_router.include_router(players_router)
 api_router.include_router(leaderboard_router)
 api_router.include_router(audit_router)
 api_router.include_router(uploads_router)
+api_router.include_router(alliances_router)

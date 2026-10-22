@@ -76,7 +76,7 @@ export const RaidsView: React.FC<RaidsViewProps> = ({ logs, loading }) => {
                     <div className="text-zinc-500 text-[11px] hidden sm:block">
                       <span>{log.old_points}</span>
                       <span className="mx-1 text-zinc-600">→</span>
-                      <span className="text-zinc-200 font-bold">{log.new_points} CRL</span>
+                      <span className="text-zinc-200 font-bold">{log.new_points} RCL POINTS</span>
                     </div>
 
                     {/* Delta badge */}
@@ -87,7 +87,7 @@ export const RaidsView: React.FC<RaidsViewProps> = ({ logs, loading }) => {
                           : 'border border-rose-500/25 bg-rose-500/10 text-rose-400'
                       }`}
                     >
-                      {isPositive ? `+${log.delta}` : log.delta} CRL
+                      {isPositive ? `+${log.delta}` : log.delta} RCL POINTS
                     </span>
                   </div>
                 </div>

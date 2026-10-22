@@ -103,7 +103,7 @@ export const DeleteClanModal: React.FC<DeleteClanModalProps> = ({
             <div className="flex items-center gap-2 text-[11px] font-mono text-zinc-400 mt-0.5">
               <span>{clan.tier}</span>
               <span className="text-zinc-700">•</span>
-              <span className="text-white font-bold">{clan.points} CRL</span>
+              <span className="text-white font-bold">{clan.points} RCL POINTS</span>
               <span className="text-zinc-700">•</span>
               <span>{clan.members.length} участников</span>
             </div>

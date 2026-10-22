@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_db, require_moderator
+from app.api.deps import get_current_user, get_db, require_moderator
 from app.models.clan import Clan
 from app.models.rating_log import RatingLog
 from app.models.user import User
@@ -12,6 +12,7 @@ from app.schemas.clan import (
     ClanDetailResponse,
     ClanRatingAdjust,
     ClanResponse,
+    ClanRosterUpdate,
     ClanUpdate,
 )
 from app.schemas.rating import RatingLogResponse
@@ -118,6 +119,38 @@ async def update_clan(
     await recalculate_all_clan_ranks(db)
     await db.refresh(clan)
 
+    return ClanResponse.model_validate(clan)
+
+
+@router.put("/{clan_id}/roster", response_model=ClanResponse, summary="Обновить состав клана (Лидер клана или Модератор)")
+async def update_clan_roster(
+    clan_id: int,
+    data: ClanRosterUpdate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    clan = await db.get(Clan, clan_id)
+    if not clan:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Клан не найден")
+
+    # Проверка прав: модератор/админ ИЛИ лидер именно этого клана
+    is_mod = current_user.role in ("admin", "moderator")
+    is_leader_of_clan = current_user.role == "clan_leader" and current_user.clan_id == clan_id
+
+    if not (is_mod or is_leader_of_clan):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Вы можете изменять состав только своего клана",
+        )
+
+    if data.members is not None:
+        cleaned = [m.strip() for m in data.members if m and m.strip()]
+        clan.roster = ", ".join(cleaned)
+    elif data.roster is not None:
+        clan.roster = data.roster.strip()
+
+    await db.commit()
+    await db.refresh(clan)
     return ClanResponse.model_validate(clan)
 
 

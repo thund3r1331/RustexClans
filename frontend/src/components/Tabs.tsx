@@ -1,5 +1,5 @@
 import React from 'react';
-import { ListOrdered, Trophy, Flame, BookOpen } from 'lucide-react';
+import { ListOrdered, Trophy, Flame, BookOpen, Handshake } from 'lucide-react';
 import { TabId } from '../types';
 
 interface TabsProps {
@@ -11,9 +11,10 @@ interface TabsProps {
 export const Tabs: React.FC<TabsProps> = ({ activeTab, onChange, raidsCount }) => {
   const tabs: { id: TabId; label: string; icon: React.FC<{ className?: string }> }[] = [
     { id: 'ladder', label: 'Ладдер', icon: ListOrdered },
-    { id: 'podium', label: 'Топ-3 Пьедестал', icon: Trophy },
+    { id: 'podium', label: 'Топ-3', icon: Trophy },
     { id: 'raids', label: 'Рейды', icon: Flame },
-    { id: 'rules', label: 'Регламент и правила', icon: BookOpen },
+    { id: 'alliances', label: 'Альянсы', icon: Handshake },
+    { id: 'rules', label: 'Регламент', icon: BookOpen },
   ];
 
   return (
